@@ -19,16 +19,20 @@ os.chdir(BASE_DIR)
 subscribers_lock = threading.Lock()
 subscribers = set()
 latest_state = {
-    "questionText": "???",
+    "questionText": "ฝึกเติม code ภาษา C",
+    "correctAnswer": "",
+    "hint": "",
+    "scoreCorrect": 0,
+    "scoreIncorrect": 0,
+    "scoreSkipped": 0,
     "totalQuestions": 0,
-    "correctAnswers": 0,
-    "incorrectAnswers": 0,
-    "stopGame": False,
-    "resetBtnText": "Start",
-    "resetBtnClass": "btn btn-success btn-lg",
-    "lang": "c",
-    "mode": "basic",
-    "buttons": []
+    "status": "unattempted",
+    "mainBtnText": "ตรวจคำตอบ",
+    "level": "1",
+    "buttons": [
+        {"id": "main-action-btn", "text": "ตรวจคำตอบ", "className": "btn btn-primary btn-lg"},
+        {"id": "reveal-c-btn", "text": "เฉลยคำตอบ", "className": "btn btn-outline-success btn-lg"}
+    ]
 }
 
 def broadcast_message(message: dict):
@@ -145,10 +149,19 @@ def get_network_ips():
 
     return tailscale_ip, wifi_ip, host_ips
 
-SERVER_PORT = find_free_port(8000)
+SERVER_PORT = find_free_port(8005)
 TAILSCALE_IP, WIFI_IP, ALL_IPS = get_network_ips()
 
 class RemoteAppHandler(SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory=BASE_DIR, **kwargs)
+
+    def end_headers(self):
+        self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
+        super().end_headers()
+
     # Set explicit extensions map to prevent Windows registry MIME bugs
     extensions_map = SimpleHTTPRequestHandler.extensions_map.copy()
     extensions_map.update({
