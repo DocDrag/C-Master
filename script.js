@@ -1,3 +1,5 @@
+let isTeachingMode = false;
+let eventSource = null;
 let currentAnswer = "";
 let currentHint = "";
 let lastQuestionType = "";
@@ -516,8 +518,33 @@ nextQuestion();
 // ==========================================
 // Remote Control & Live Teaching Sync
 // ==========================================
-let isTeachingMode = false;
-let eventSource = null;
+
+function revealAnswerOnScreen() {
+    if (currentQuestionStatus === "completed") return;
+
+    const userInputEl = document.getElementById("userInput");
+    const feedbackBox = document.getElementById("feedback");
+    const mainBtn = document.getElementById("main-action-btn");
+
+    currentQuestionStatus = "wrong";
+    finalizeCurrentQuestion();
+
+    if (userInputEl) {
+        userInputEl.value = currentAnswer;
+        userInputEl.disabled = true;
+    }
+
+    if (feedbackBox) {
+        feedbackBox.innerHTML = `<span class='incorrect'>💡 เฉลย: คำตอบที่ถูกต้องคือ <strong>${currentAnswer}</strong></span>`;
+    }
+
+    if (mainBtn) {
+        mainBtn.innerHTML = '<i class="fas fa-forward"></i> ข้อต่อไป';
+        mainBtn.className = 'container-fluid btn btn-warning btn-lg';
+    }
+
+    syncStateToRemote();
+}
 
 function syncStateToRemote() {
     if (!isTeachingMode || !window.location.protocol.startsWith("http")) return;
@@ -525,8 +552,11 @@ function syncStateToRemote() {
     const codeDisplayEl = document.getElementById("code-display");
     const mainBtn = document.getElementById("main-action-btn");
     const levelSelect = document.getElementById("level-select");
+    const focusToggle = document.getElementById("focus-toggle");
+    const userInputEl = document.getElementById("userInput");
 
     const state = {
+        gameTitle: "C Master",
         questionText: codeDisplayEl ? codeDisplayEl.innerText.trim() : "",
         correctAnswer: currentAnswer,
         hint: currentHint,
@@ -535,12 +565,11 @@ function syncStateToRemote() {
         scoreSkipped: scoreSkipped,
         totalQuestions: scoreCorrect + scoreIncorrect + scoreSkipped,
         status: currentQuestionStatus,
+        isAnswered: currentQuestionStatus !== "unattempted",
         mainBtnText: mainBtn ? mainBtn.innerText.trim() : "ตรวจคำตอบ",
         level: levelSelect ? levelSelect.value : "1",
-        buttons: [
-            { id: "main-action-btn", text: mainBtn ? mainBtn.innerText.trim() : "ตรวจคำตอบ", className: mainBtn ? mainBtn.className : "btn btn-primary btn-lg" },
-            { id: "reveal-c-btn", text: `เฉลย (${currentAnswer})`, className: "btn btn-outline-success btn-lg" }
-        ]
+        focus: focusToggle ? focusToggle.checked : false,
+        inputValue: userInputEl ? userInputEl.value : ""
     };
 
     fetch("/api/state", {
@@ -557,12 +586,33 @@ function handleRemoteAction(data) {
     }
 
     if (data.action === "click") {
-        if (data.target === "reveal-c-btn") {
+        if (data.target === "reveal-btn" || data.target === "reveal-c-btn" || data.target === "reveal_on_screen") {
             const inputEl = document.getElementById("userInput");
             if (inputEl) {
                 inputEl.value = currentAnswer;
             }
-            handleMainAction();
+            if (currentQuestionStatus === "unattempted") {
+                checkAnswer();
+            }
+            syncStateToRemote();
+        } else if (data.target === "check-btn" || data.target === "main-action-btn") {
+            if (currentQuestionStatus === "unattempted") {
+                checkAnswer();
+            } else {
+                nextQuestion();
+            }
+            syncStateToRemote();
+        } else if (data.target === "next-btn") {
+            nextQuestion();
+            syncStateToRemote();
+        } else if (data.target === "restart_game" || data.target === "restart-btn" || data.target === "btn-restart") {
+            scoreCorrect = 0;
+            scoreIncorrect = 0;
+            scoreSkipped = 0;
+            currentQuestionStatus = "completed";
+            updateScoreUI();
+            nextQuestion();
+            syncStateToRemote();
         } else {
             const el = document.getElementById(data.target);
             if (el) {
@@ -571,16 +621,16 @@ function handleRemoteAction(data) {
                 el.click();
             }
         }
-    } else if (data.action === "submit_answer") {
-        const inputEl = document.getElementById("userInput");
-        if (inputEl) {
-            inputEl.value = data.value;
-        }
-        handleMainAction();
     } else if (data.action === "set_level") {
         const levelSelect = document.getElementById("level-select");
         if (levelSelect && data.value && levelSelect.value !== data.value) {
             levelSelect.value = data.value;
+            changeLevel();
+        }
+    } else if (data.action === "toggle_focus") {
+        const focusToggle = document.getElementById("focus-toggle");
+        if (focusToggle) {
+            focusToggle.checked = !focusToggle.checked;
             changeLevel();
         }
     }

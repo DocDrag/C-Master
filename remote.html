@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>C Master - Teacher Remote</title>
+  <title>C Master - รีโมทครูผู้สอน</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
@@ -16,7 +16,6 @@
       --danger: #ef4444;
       --warning: #f59e0b;
       --primary: #3b82f6;
-      --btn-dark: #1e293b;
     }
 
     * {
@@ -35,7 +34,7 @@
       display: flex;
       flex-direction: column;
       padding: 12px;
-      padding-bottom: 90px; /* Space for bottom action bar */
+      padding-bottom: 96px; /* Space for fixed bottom action bar */
     }
 
     /* Top Bar */
@@ -47,7 +46,7 @@
       border: 1px solid var(--card-border);
       border-radius: 14px;
       padding: 10px 14px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
     }
 
@@ -84,7 +83,7 @@
 
     .score-summary {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       font-size: 0.85rem;
       font-weight: 700;
     }
@@ -92,6 +91,7 @@
     .score-item.total { color: #60a5fa; }
     .score-item.correct { color: #34d399; }
     .score-item.incorrect { color: #f87171; }
+    .score-item.skipped { color: #94a3b8; }
 
     /* Progress bar */
     .progress-bar-container {
@@ -118,174 +118,209 @@
       transition: width 0.3s ease;
     }
 
-    /* Question Display Card */
-    .question-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 16px;
-      text-align: center;
-      margin-bottom: 14px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    .progress-fill-skipped {
+      background: #64748b;
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
     }
 
-    .question-label {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-    }
-
-    .question-text {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #38bdf8;
-      min-height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      word-break: break-word;
-      font-family: 'Consolas', 'Courier New', monospace;
-      background: rgba(15, 23, 42, 0.6);
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px dashed #334155;
-    }
-
-    .question-hint {
-      margin-top: 8px;
-      font-size: 0.78rem;
-      color: var(--text-muted);
-    }
-
-    /* Teacher Controls Bar */
+    /* Settings Bar (Level + Focus) */
     .settings-bar {
       display: flex;
-      gap: 8px;
+      align-items: center;
+      gap: 10px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 8px 12px;
       margin-bottom: 12px;
     }
 
     .select-pill {
       flex: 1;
-      background: var(--card-bg);
+      background: #0f172a;
       border: 1px solid var(--card-border);
       color: var(--text-main);
       padding: 8px 10px;
-      border-radius: 10px;
-      font-size: 0.8rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
       font-weight: 600;
       outline: none;
     }
 
-    /* Answer Buttons */
-    .answers-container {
+    .focus-toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .focus-toggle-wrap input {
+      accent-color: var(--primary);
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    /* Code Display */
+    .code-box {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      background: #090d16;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 12px;
+      color: #38bdf8;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .hint-box {
+      margin-top: 8px;
+      font-size: 0.82rem;
+      color: #94a3b8;
+    }
+
+    /* Actions Card */
+    .actions-grid {
       display: flex;
       flex-direction: column;
       gap: 10px;
-      flex: 1;
+      margin-top: 6px;
     }
 
-    .answer-btn {
-      background: #1e293b;
-      border: 1.5px solid #334155;
-      color: #f1f5f9;
-      padding: 14px 16px;
-      border-radius: 14px;
-      font-size: 1.05rem;
-      font-weight: 600;
-      text-align: left;
+    .btn-action-tile {
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #ffffff;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
       transition: all 0.15s ease;
-      min-height: 56px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
     }
 
-    .answer-btn:active {
-      transform: scale(0.98);
-      background: #334155;
+    .btn-action-tile:active {
+      transform: scale(0.97);
     }
 
-    .answer-btn.btn-success {
-      background: rgba(16, 185, 129, 0.25) !important;
-      border-color: #10b981 !important;
-      color: #34d399 !important;
-      box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+    .btn-reveal {
+      background: linear-gradient(135deg, #d97706, #f59e0b);
+      border: 1.5px solid rgba(251, 191, 36, 0.4);
     }
 
-    .answer-btn.btn-danger {
-      background: rgba(239, 68, 68, 0.25) !important;
-      border-color: #ef4444 !important;
-      color: #f87171 !important;
-      box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+    .btn-reveal:active {
+      background: #b45309;
     }
 
-    .answer-btn .btn-badge {
+    .btn-check {
+      background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+      border: 1.5px solid rgba(96, 165, 250, 0.4);
+    }
+
+    .btn-check:active {
+      background: #1e40af;
+    }
+
+    .btn-action-tile .tile-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-action-tile .tile-sub {
       font-size: 0.78rem;
-      padding: 3px 8px;
-      border-radius: 6px;
-      background: #334155;
-      color: #cbd5e1;
       font-weight: normal;
+      opacity: 0.9;
     }
 
-    /* Bottom Fixed Action Bar */
+    /* Fixed Bottom Action Bar */
     .bottom-bar {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
       background: rgba(15, 23, 42, 0.95);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border-top: 1px solid var(--card-border);
-      padding: 12px 16px;
+      padding: 10px 14px;
       display: flex;
       gap: 10px;
       z-index: 100;
+      box-shadow: 0 -4px 16px rgba(0,0,0,0.4);
     }
 
     .action-btn {
       flex: 1;
       border: none;
-      border-radius: 14px;
-      padding: 14px 20px;
-      font-size: 1.15rem;
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 1.05rem;
       font-weight: 700;
       color: #ffffff;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 8px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
       transition: all 0.15s ease;
-      min-height: 54px;
+      min-height: 52px;
     }
 
     .action-btn:active {
       transform: scale(0.97);
     }
 
-    .action-btn.btn-start {
+    .btn-next-main {
       background: linear-gradient(135deg, #059669, #10b981);
+      animation: pulseGlow 1.8s infinite;
     }
 
-    .action-btn.btn-next {
-      background: linear-gradient(135deg, #d97706, #f59e0b);
-      animation: bounce 1.8s infinite;
+    .btn-restart-round {
+      flex: 0 0 52px;
+      background: #334155;
+      color: #cbd5e1;
+      border: 1px solid #475569;
+      padding: 0;
+      font-size: 1.1rem;
     }
 
-    .action-btn.btn-reset {
-      background: linear-gradient(135deg, #475569, #64748b);
-    }
-
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-3px); }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 12px rgba(16, 185, 129, 0.3); }
+      50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.6); }
     }
 
     /* Toast */
@@ -293,18 +328,19 @@
       position: fixed;
       top: 16px;
       left: 50%;
-      transform: translateX(-50%) translateY(-20px);
-      background: #334155;
+      transform: translateX(-50%) translateY(-30px);
+      background: #1e293b;
+      border: 1px solid #475569;
       color: #fff;
-      padding: 8px 16px;
+      padding: 8px 18px;
       border-radius: 20px;
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       font-weight: 600;
       opacity: 0;
       pointer-events: none;
-      transition: all 0.3s ease;
+      transition: all 0.25s ease;
       z-index: 200;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
     }
 
     .toast.show {
@@ -315,7 +351,7 @@
 </head>
 <body>
 
-  <!-- Top Bar: Connection Status & Live Score -->
+  <!-- Top Bar: Live Status & Counters -->
   <div class="top-bar">
     <div class="status-badge">
       <span id="status-dot" class="status-dot"></span>
@@ -325,6 +361,7 @@
       <span class="score-item total" id="score-total">ข้อ: 0</span>
       <span class="score-item correct" id="score-correct"><i class="fas fa-check"></i> 0</span>
       <span class="score-item incorrect" id="score-incorrect"><i class="fas fa-times"></i> 0</span>
+      <span class="score-item skipped" id="score-skipped"><i class="fas fa-forward"></i> 0</span>
     </div>
   </div>
 
@@ -332,11 +369,12 @@
   <div class="progress-bar-container">
     <div id="prog-correct" class="progress-fill-correct"></div>
     <div id="prog-incorrect" class="progress-fill-incorrect"></div>
+    <div id="prog-skipped" class="progress-fill-skipped"></div>
   </div>
 
-  <!-- Level Selector -->
+  <!-- Settings Bar (Level + Focus) -->
   <div class="settings-bar">
-    <select id="remote-level-select" class="select-pill" style="width: 100%;">
+    <select id="remote-level-select" class="select-pill">
       <option value="1">ระดับ 1 (โครงสร้างพื้นฐานและแสดงผล)</option>
       <option value="2">ระดับ 2 (ตัวแปรและชนิดข้อมูล)</option>
       <option value="3">ระดับ 3 (รับค่าข้อมูล)</option>
@@ -348,24 +386,55 @@
       <option value="9">ระดับ 9 (อาร์เรย์และสตริง)</option>
       <option value="10">ระดับ 10 (โครงสร้างข้อมูลและไฟล์)</option>
     </select>
+    <label class="focus-toggle-wrap">
+      <input type="checkbox" id="remote-focus-toggle">
+      <span>โฟกัส</span>
+    </label>
   </div>
 
-  <!-- Current Question Card -->
-  <div class="question-card">
-    <div class="question-label" id="card-label">หน้าจอกำลังแสดงโจทย์</div>
-    <div class="question-text" id="remote-question">กำลังโหลด...</div>
-    <div class="question-hint" id="remote-hint">แตะปุ่มคำตอบด้านล่างเพื่อสั่งหน้าจอคอมพิวเตอร์</div>
+  <!-- Card 1: Question Mirror on Projector -->
+  <div class="card">
+    <div class="card-header">
+      <span id="question-card-title"><i class="fas fa-tv me-1"></i> จอคอมกำลังแสดงโจทย์</span>
+      <span id="status-label" class="badge" style="font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; background: #334155;">รอตอบ</span>
+    </div>
+    <div class="code-box" id="remote-code-preview">กำลังโหลดโจทย์...</div>
+    <div class="hint-box" id="remote-hint"><i class="fas fa-lightbulb text-warning me-1"></i> กำลังรอข้อมูล...</div>
   </div>
 
-  <!-- Answer Buttons Container -->
-  <div class="answers-container" id="remote-answers-zone">
-    <!-- Buttons will be injected here dynamically -->
+  <!-- Card 2: Quick Action Controls -->
+  <div class="card">
+    <div class="card-header">
+      <span><i class="fas fa-gamepad me-1"></i> สั่งการจอคอมพิวเตอร์</span>
+    </div>
+    <div class="actions-grid">
+      <!-- Reveal Button: Puts answer onto web directly -->
+      <button id="btn-reveal-action" class="btn-action-tile btn-reveal">
+        <div class="tile-title">
+          <i class="fas fa-lightbulb" style="font-size: 1.3rem;"></i>
+          <span>เฉลยคำตอบ</span>
+        </div>
+        <div class="tile-sub">ใส่คำตอบลงบนเว็บทันที <i class="fas fa-arrow-right"></i></div>
+      </button>
+
+      <!-- Check Button: Checks current input on PC -->
+      <button id="btn-check-action" class="btn-action-tile btn-check">
+        <div class="tile-title">
+          <i class="fas fa-check-circle" style="font-size: 1.3rem;"></i>
+          <span>ตรวจคำตอบ</span>
+        </div>
+        <div class="tile-sub">ตรวจคำตอบที่พิมพ์ไว้ <i class="fas fa-arrow-right"></i></div>
+      </button>
+    </div>
   </div>
 
-  <!-- Bottom Floating Action Bar -->
+  <!-- Fixed Bottom Bar: Next / Reset -->
   <div class="bottom-bar">
-    <button id="remote-action-btn" class="action-btn btn-start">
-      <i class="fas fa-play"></i> เริ่มเกม (Start)
+    <button id="btn-next-action" class="action-btn btn-next-main">
+      <i class="fas fa-forward"></i> ข้อถัดไป (Next Question)
+    </button>
+    <button id="btn-restart-game" class="action-btn btn-restart-round" title="เริ่มใหม่ (Reset Score)">
+      <i class="fas fa-redo"></i>
     </button>
   </div>
 
@@ -380,20 +449,29 @@
     const scoreTotal = document.getElementById("score-total");
     const scoreCorrect = document.getElementById("score-correct");
     const scoreIncorrect = document.getElementById("score-incorrect");
+    const scoreSkipped = document.getElementById("score-skipped");
     const progCorrect = document.getElementById("prog-correct");
     const progIncorrect = document.getElementById("prog-incorrect");
-    const remoteQuestion = document.getElementById("remote-question");
-    const remoteAnswersZone = document.getElementById("remote-answers-zone");
-    const remoteActionBtn = document.getElementById("remote-action-btn");
-    const remoteLangSelect = document.getElementById("remote-lang-select");
+    const progSkipped = document.getElementById("prog-skipped");
+
     const remoteLevelSelect = document.getElementById("remote-level-select");
-    const cardLabel = document.getElementById("card-label");
+    const remoteFocusToggle = document.getElementById("remote-focus-toggle");
+
+    const statusLabel = document.getElementById("status-label");
+    const remoteCodePreview = document.getElementById("remote-code-preview");
+    const remoteHint = document.getElementById("remote-hint");
+
+    const btnRevealAction = document.getElementById("btn-reveal-action");
+    const btnCheckAction = document.getElementById("btn-check-action");
+    const btnNextAction = document.getElementById("btn-next-action");
+    const btnRestartGame = document.getElementById("btn-restart-game");
+
     const toast = document.getElementById("toast");
 
     function showToast(msg) {
       toast.textContent = msg;
       toast.classList.add("show");
-      setTimeout(() => toast.classList.remove("show"), 1200);
+      setTimeout(() => toast.classList.remove("show"), 1400);
     }
 
     function vibrate() {
@@ -402,7 +480,6 @@
       }
     }
 
-    // Send action to server
     async function sendAction(action, target, value) {
       vibrate();
       try {
@@ -416,11 +493,8 @@
       }
     }
 
-    // Connect to SSE stream
     function connectSSE() {
-      if (evtSource) {
-        evtSource.close();
-      }
+      if (evtSource) evtSource.close();
 
       statusDot.className = "status-dot";
       statusText.textContent = "กำลังเชื่อมต่อ...";
@@ -430,7 +504,6 @@
       evtSource.onopen = () => {
         statusDot.className = "status-dot connected";
         statusText.textContent = "เชื่อมต่อคอมแล้ว";
-        // Request latest state immediately
         sendAction("request_state");
       };
 
@@ -444,9 +517,7 @@
       evtSource.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          if (data.type === "state" && data.state) {
-            updateUI(data.state);
-          } else if (data.type === "init" && data.state) {
+          if ((data.type === "state" || data.type === "init") && data.state) {
             updateUI(data.state);
           }
         } catch (err) {
@@ -455,7 +526,6 @@
       };
     }
 
-    // Fetch state once on initial load
     async function fetchInitialState() {
       try {
         const res = await fetch("/api/state");
@@ -471,149 +541,109 @@
     function updateUI(state) {
       currentState = state;
 
-      // Update Question
-      const qText = state.questionText || "???";
-      remoteQuestion.textContent = qText;
-
-      // Update counters
-      const total = state.totalQuestions || 0;
-      const correct = state.correctAnswers || 0;
-      const incorrect = state.incorrectAnswers || 0;
+      // Counters
+      const correct = state.scoreCorrect || 0;
+      const incorrect = state.scoreIncorrect || 0;
+      const skipped = state.scoreSkipped || 0;
+      const total = state.totalQuestions !== undefined ? state.totalQuestions : (correct + incorrect + skipped);
 
       scoreTotal.textContent = `ข้อ: ${total}`;
       scoreCorrect.innerHTML = `<i class="fas fa-check"></i> ${correct}`;
       scoreIncorrect.innerHTML = `<i class="fas fa-times"></i> ${incorrect}`;
+      if (scoreSkipped) scoreSkipped.innerHTML = `<i class="fas fa-forward"></i> ${skipped}`;
 
-      const totalAnswered = correct + incorrect;
-      if (totalAnswered > 0) {
-        progCorrect.style.width = (correct / totalAnswered * 100) + "%";
-        progIncorrect.style.width = (incorrect / totalAnswered * 100) + "%";
+      const totalCount = correct + incorrect + skipped;
+      if (totalCount > 0) {
+        progCorrect.style.width = (correct / totalCount * 100) + "%";
+        progIncorrect.style.width = (incorrect / totalCount * 100) + "%";
+        if (progSkipped) progSkipped.style.width = (skipped / totalCount * 100) + "%";
       } else {
         progCorrect.style.width = "0%";
         progIncorrect.style.width = "0%";
+        if (progSkipped) progSkipped.style.width = "0%";
       }
 
-      // Update Selectors if not matching
+      // Level & Focus
       if (remoteLevelSelect && state.level && remoteLevelSelect.value !== state.level) {
         remoteLevelSelect.value = state.level;
       }
+      if (remoteFocusToggle && state.focus !== undefined) {
+        remoteFocusToggle.checked = Boolean(state.focus);
+      }
 
-      // Update Primary Action Button (Start / Next / Reset)
-      const btnText = (state.resetBtnText || "Start").trim();
-      const isStopGame = state.stopGame;
+      // Code preview
+      const qText = state.questionText || "(กำลังเตรียมโจทย์)";
+      remoteCodePreview.textContent = qText;
 
-      if (total === 0 || btnText.includes("Start")) {
-        remoteActionBtn.className = "action-btn btn-start";
-        remoteActionBtn.innerHTML = '<i class="fas fa-play"></i> เริ่มเกม (Start)';
-        cardLabel.textContent = "พร้อมเริ่มการสอน";
-      } else if (isStopGame || btnText.includes("Next")) {
-        remoteActionBtn.className = "action-btn btn-next";
-        remoteActionBtn.innerHTML = '<i class="fas fa-forward"></i> ข้อถัดไป (Next)';
-        cardLabel.textContent = "เฉลยคำตอบแล้ว";
+      // Hint
+      const hint = state.hint || "";
+      remoteHint.innerHTML = hint ? `<i class="fas fa-lightbulb text-warning me-1"></i> คำใบ้: ${hint}` : "";
+
+      // Status
+      const status = state.status || "unattempted";
+      if (status === "correct") {
+        statusLabel.style.background = "#10b981";
+        statusLabel.textContent = "เฉลย/ตอบถูก ✅";
+      } else if (status === "wrong") {
+        statusLabel.style.background = "#ef4444";
+        statusLabel.textContent = "ตอบผิด ❌";
       } else {
-        remoteActionBtn.className = "action-btn btn-reset";
-        remoteActionBtn.innerHTML = '<i class="fas fa-rotate-right"></i> สุ่มข้อใหม่ / Reset';
-        cardLabel.textContent = `ข้อที่ ${total} - กำลังรอคำตอบ`;
+        statusLabel.style.background = "#334155";
+        statusLabel.textContent = "รอตอบ...";
       }
-
-      // Update Buttons
-      renderButtons(state.buttons || [], state.stopGame);
     }
 
-    function renderButtons(buttons, isAnswered) {
-      remoteAnswersZone.innerHTML = "";
+    // Reveal Button -> Puts answer directly into the website input!
+    btnRevealAction.addEventListener("click", () => {
+      sendAction("click", "reveal-btn");
+      showToast("ใส่คำตอบลงบนเว็บแล้ว");
+    });
 
-      if (!buttons || buttons.length === 0) {
-        // Fallback default buttons if not yet initialized
-        const defaultBtns = [
-          { id: "main-action-btn", text: "ตรวจคำตอบ", className: "btn btn-primary btn-lg" },
-          { id: "reveal-c-btn", text: "เฉลยคำตอบ", className: "btn btn-outline-success btn-lg" }
-        ];
-        defaultBtns.forEach((btnData) => {
-          const btn = createButtonElement(btnData, isAnswered);
-          remoteAnswersZone.appendChild(btn);
-        });
-        return;
+    // Check Button -> Checks the answer on the website
+    btnCheckAction.addEventListener("click", () => {
+      sendAction("click", "check-btn");
+      showToast("ตรวจคำตอบแล้ว");
+    });
+
+    // Next Question Button
+    btnNextAction.addEventListener("click", () => {
+      sendAction("click", "next-btn");
+      showToast("สุ่มข้อถัดไปแล้ว");
+    });
+
+    // Restart game
+    btnRestartGame.addEventListener("click", () => {
+      if (confirm("ต้องการเริ่มใหม่และรีเซ็ตคะแนนใช่หรือไม่?")) {
+        sendAction("click", "restart_game");
+        showToast("รีเซ็ตคะแนนแล้ว");
       }
+    });
 
-      buttons.forEach((btnData) => {
-        const btn = createButtonElement(btnData, isAnswered);
-        remoteAnswersZone.appendChild(btn);
-      });
-    }
+    // Level change
+    remoteLevelSelect.addEventListener("change", (e) => {
+      sendAction("set_level", null, e.target.value);
+      showToast("เปลี่ยนระดับ: " + e.target.value);
+    });
 
-    function createButtonElement(btnData, isAnswered) {
-      const btn = document.createElement("button");
-      btn.className = "answer-btn";
-      btn.id = "remote-" + btnData.id;
+    // Focus toggle
+    remoteFocusToggle.addEventListener("change", () => {
+      sendAction("toggle_focus");
+      showToast("สลับโฟกัสระดับ");
+    });
 
-      // Check if button turned green or red on PC
-      if (btnData.className.includes("btn-success")) {
-        btn.classList.add("btn-success");
-      } else if (btnData.className.includes("btn-danger")) {
-        btn.classList.add("btn-danger");
-      }
-
-      // Format text
-      let displayHtml = `<span>${btnData.text}</span>`;
-      if (btnData.className.includes("btn-success")) {
-        displayHtml += ` <i class="fas fa-check-circle" style="color: #34d399; font-size: 1.3rem;"></i>`;
-      } else if (btnData.className.includes("btn-danger")) {
-        displayHtml += ` <i class="fas fa-times-circle" style="color: #f87171; font-size: 1.3rem;"></i>`;
-      } else {
-        displayHtml += ` <i class="fas fa-chevron-right" style="color: #475569;"></i>`;
-      }
-
-      btn.innerHTML = displayHtml;
-
-      if (isAnswered) {
-        btn.style.pointerEvents = "none";
-        if (!btnData.className.includes("btn-success") && !btnData.className.includes("btn-danger")) {
-          btn.style.opacity = "0.5";
-        }
-      }
-
-      btn.addEventListener("click", () => {
-        showToast("เลือก: " + btnData.text.split(",")[0]);
-        sendAction("click", btnData.id);
-      });
-
-      return btn;
-    }
-
-    // Keep Screen Awake while teaching
+    // Screen WakeLock
     let wakeLock = null;
     async function requestWakeLock() {
       if ("wakeLock" in navigator) {
-        try {
-          wakeLock = await navigator.wakeLock.request("screen");
-        } catch (err) {}
+        try { wakeLock = await navigator.wakeLock.request("screen"); } catch(e){}
       }
     }
-
     document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") {
-        requestWakeLock();
-      }
+      if (document.visibilityState === "visible") requestWakeLock();
     });
-
     window.addEventListener("click", () => {
       if (!wakeLock) requestWakeLock();
     }, { once: true });
-
-    // Action button click (Check / Next)
-    remoteActionBtn.addEventListener("click", () => {
-      sendAction("click", "main-action-btn");
-      showToast("ส่งคำสั่งแล้ว");
-    });
-
-    // Level change from remote
-    if (remoteLevelSelect) {
-      remoteLevelSelect.addEventListener("change", (e) => {
-        sendAction("set_level", null, e.target.value);
-        showToast("เปลี่ยนระดับ: " + e.target.value);
-      });
-    }
 
     // Initial setup
     fetchInitialState();
@@ -621,4 +651,3 @@
   </script>
 </body>
 </html>
-
